@@ -5,28 +5,15 @@
 This project focuses on detecting signs of Polycystic Ovary Syndrome (PCOS) from ultrasound images of ovaries. To achieve this, a custom deep learning model was designed that:
 
 Splits each image into two parts (top and bottom halves) to capture distinct patterns more effectively.
-
 Processes each half through separate CNN branches (Two-Stream CNN).
-
 Combines the extracted features using a Transformer-based Multi-Head Attention mechanism to learn complex relationships.
 
 The model is trained to classify each ultrasound image as either "PCOS infected" or "non-infected", helping in early diagnosis with high accuracy.
 
-## 📁 Project Structure
-PCOS-Ultrasound-Classification/
-├── README.md                      # Project overview and documentation
-├── kaggle.json                    # Your Kaggle API credentials (keep it secure)
-├── model.png                      # Visual architecture of the model
-├── model_architecture.json        # Saved architecture of the trained model
-├── pcos_classification_twostream.ipynb  # Main Colab notebook with code
-├── requirements.txt               # All dependencies required for the project
-
-
----
 
 ## 🔍 3. Dataset Details
 
-```markdown
+
 ## 📂 Dataset
 
 The dataset used is **[PCOS-XAI-Ultrasound](https://www.kaggle.com/datasets/ibadeus/pcos-xai-ultrasound-dataset)** containing ultrasound images categorized as:
