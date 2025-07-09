@@ -1,45 +1,43 @@
-# PCOS Ultrasound Image Classification using Two-Stream CNN & Transformer Attention
+# 🧠 PCOS Ultrasound Image Classification using Two-Stream CNN & Transformer Attention
 
-"PCOS Ultrasound Image Classification using Two-Stream CNN & Transformer Attention"
+This project focuses on detecting signs of **Polycystic Ovary Syndrome (PCOS)** from **ultrasound images** of ovaries using a deep learning model that combines:
 
-This project focuses on detecting signs of Polycystic Ovary Syndrome (PCOS) from ultrasound images of ovaries. To achieve this, a custom deep learning model was designed that:
+- A **Two-Stream Convolutional Neural Network (CNN)** to analyze the upper and lower halves of the image separately.
+- A **Transformer-based Multi-Head Attention** mechanism to understand complex interactions in features.
 
-Splits each image into two parts (top and bottom halves) to capture distinct patterns more effectively.
-Processes each half through separate CNN branches (Two-Stream CNN).
-Combines the extracted features using a Transformer-based Multi-Head Attention mechanism to learn complex relationships.
+The model classifies each ultrasound image into either:
 
-The model is trained to classify each ultrasound image as either "PCOS infected" or "non-infected", helping in early diagnosis with high accuracy.
-
-
-## 🔍 3. Dataset Details
-
-
-## 📂 Dataset
-
-The dataset used is **[PCOS-XAI-Ultrasound](https://www.kaggle.com/datasets/ibadeus/pcos-xai-ultrasound-dataset)** containing ultrasound images categorized as:
-
-- `infected` (with PCOS)
-- `noninfected`
-
-It was downloaded using:
-
-```python
-import kagglehub
-path = kagglehub.dataset_download("ibadeus/pcos-xai-ultrasound-dataset")
+- ✅ `noninfected` — healthy ovaries  
+- 🚫 `infected` — ovaries with PCOS
 
 ---
 
-## 🧹 4. Data Preprocessing & Augmentation
+## 📦 1. Dataset
 
-```markdown
-## 🧹 Data Preprocessing & Augmentation
+We use the [**PCOS-XAI-Ultrasound Dataset**](https://www.kaggle.com/datasets/ibadeus/pcos-xai-ultrasound-dataset), which contains labeled ultrasound images of ovaries.
 
-Balanced and augmented the dataset to handle class imbalance:
+- **infected/**: Images of ovaries diagnosed with PCOS  
+- **noninfected/**: Normal, healthy ovary images  
+
+You can download it using:
+
+```python
+import kagglehub
+
+path = kagglehub.dataset_download("ibadeus/pcos-xai-ultrasound-dataset")
+```
+
+---
+
+## 🧹 2. Data Preprocessing & Augmentation
+
+- Encoded labels using `LabelEncoder`
+- Resampled minority class to **balance dataset**
+- Applied image rescaling with `ImageDataGenerator`
 
 ```python
 from sklearn.utils import resample
 
-# Balance dataset
 max_count = df['category_encoded'].value_counts().max()
 dfs = []
 
@@ -49,22 +47,102 @@ for category in df['category_encoded'].unique():
     dfs.append(class_upsampled)
 
 df_balanced = pd.concat(dfs).sample(frac=1, random_state=42).reset_index(drop=True)
+```
 
 ---
 
-## 🏗️ 5. Model Architecture (Two-Stream CNN + Transformer)
+## 🧠 3. Model Architecture
 
-```markdown
-## 🏗️ Model Architecture
+The architecture combines:
 
-The model splits the input image into upper and lower halves:
-- Applies separate CNN pipelines to each half
-- Uses **Multi-Head Self-Attention** on the combined feature embeddings
+- Two CNN branches:
+  - One for the upper half of the image
+  - One for the (flipped) lower half
+- Dense layers for feature embedding
+- Transformer’s **Multi-Head Attention** to merge features
+- Final classification using a `Dense` softmax layer
 
-🖼️ Here's the architecture:
+🖼️ **Architecture Overview**:
 
 ![Model Architecture](model.png)
 
-You can also find the model saved as:
-- `model_architecture.json`
-- `model_weights.weights.h5`
+---
+
+## 🧪 4. Evaluation
+
+The model was trained with:
+
+- `sparse_categorical_crossentropy` loss
+- `Adam` optimizer
+- Accuracy metrics
+
+📊 **Classification Report:**
+
+```
+              precision    recall  f1-score   support
+
+           0       1.00      0.98      0.99       679
+           1       0.98      1.00      0.99       678
+
+    accuracy                           0.99      1357
+   macro avg       0.99      0.99      0.99      1357
+weighted avg       0.99      0.99      0.99      1357
+```
+
+✅ **Test Accuracy:** `99%`
+
+---
+
+## 💾 5. Model Files
+
+- `model_architecture.json`: JSON representation of the model
+- `model_weights.weights.h5`: Saved weights of the model
+- `model.png`: Visual plot of the model architecture
+
+You can load the model with:
+
+```python
+from tensorflow.keras.models import model_from_json
+
+with open("model_architecture.json", "r") as json_file:
+    loaded_model_json = json_file.read()
+
+model = model_from_json(loaded_model_json, custom_objects={
+    "split_image": split_image,
+    "flip_lower_half": flip_lower_half
+})
+model.load_weights("model_weights.weights.h5")
+model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+```
+
+---
+
+## 📁 Project Structure
+
+```bash
+PCOS-Ultrasound-Classification/
+├── README.md                      # This documentation file
+├── model.png                      # Model architecture plot
+├── model_architecture.json        # Model structure in JSON
+├── model_weights.weights.h5       # Trained weights
+├── requirements.txt               # Python dependencies
+├── pcos_classification.ipynb      # Main Jupyter Notebook
+```
+
+---
+
+## 📚 Requirements
+
+Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## 🚀 Future Work
+
+- Deploy model as a web API using Flask or FastAPI
+- Integrate Grad-CAM or SHAP for explainability
+- Extend to multi-class ovarian disorders
